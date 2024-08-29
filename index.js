@@ -13,7 +13,7 @@ async function fetchHTML(url) {
 }
 
 // Example usage
-const url = 'https://example.com'; // Replace with the URL you want to scrape
+const url = 'https://google.com'; // Replace with the URL you want to scrape
 
 fetchHTML(url).then(html => {
     console.log(html);
