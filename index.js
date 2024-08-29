@@ -1,25 +1,20 @@
-const express = require('express');
 const axios = require('axios');
+const cheerio = require('cheerio');
 
-const app = express();
-const port = process.env.PORT || 3000;
+// Function to fetch and return HTML of a given URL
+async function fetchHTML(url) {
+    try {
+        const response = await axios.get(url);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching the URL:', error);
+        return 'Error fetching the URL';
+    }
+}
 
-// Endpoint to scrape HTML content from a URL
-app.get('/scrape', async (req, res) => {
-  const url = req.query.url;
+// Example usage
+const url = 'https://example.com'; // Replace with the URL you want to scrape
 
-  if (!url) {
-    return res.status(400).send('URL query parameter is required');
-  }
-
-  try {
-    const response = await axios.get(url);
-    res.send(response.data);
-  } catch (error) {
-    res.status(500).send('Error fetching the URL');
-  }
-});
-
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+fetchHTML(url).then(html => {
+    console.log(html);
 });
