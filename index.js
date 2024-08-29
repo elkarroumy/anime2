@@ -1,10 +1,8 @@
 const { Telegraf } = require('telegraf');
 const puppeteer = require('puppeteer');
-// Replace YOUR_TELEGRAM_BOT_TOKEN with your bot token
-const bot = new Telegraf('7445379003:AAEUklI4zCtGQBHSW_tjRxuka2bCAHBf23M');
 
+const bot = new Telegraf(process.env.BOT_TOKEN);
 
-// Function to get video src from a URL
 async function getVideoSrc(url_website) {
   const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
@@ -38,14 +36,10 @@ async function getVideoSrc(url_website) {
   return videoSrc;
 }
 
-// Command for starting the bot
 bot.start((ctx) => ctx.reply('Welcome! Send me a website URL, and I will find the video source for you.'));
 
-// Command for handling messages
 bot.on('text', async (ctx) => {
   const messageText = ctx.message.text;
-
-  // Basic URL validation
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const urlMatch = messageText.match(urlRegex);
 
@@ -62,5 +56,8 @@ bot.on('text', async (ctx) => {
   }
 });
 
-// Launch the bot
 bot.launch();
+
+module.exports = (req, res) => {
+  res.send('Bot is running');
+};
