@@ -1,63 +1,25 @@
-const { Telegraf } = require('telegraf');
-const puppeteer = require('puppeteer');
+const express = require('express');
+const axios = require('axios');
 
-const bot = new Telegraf(process.env.BOT_TOKEN);
+const app = express();
+const port = process.env.PORT || 3000;
 
-async function getVideoSrc(url_website) {
-  const browser = await puppeteer.launch({ headless: true });
-  const page = await browser.newPage();
-  let videoSrc = null;
+// Endpoint to scrape HTML content from a URL
+app.get('/scrape', async (req, res) => {
+  const url = req.query.url;
 
-  try {
-    await page.goto(url_website, { 
-      waitUntil: 'networkidle2', 
-      timeout: 120000
-    });
-
-    await page.waitForSelector('video', { timeout: 60000 });
-
-    const waitFor = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-    await waitFor(5000);
-
-    videoSrc = await page.evaluate(() => {
-      const videoElement = document.querySelector('video');
-      if (videoElement && videoElement.src) {
-        return videoElement.src;
-      } else {
-        return null;
-      }
-    });
-  } catch (error) {
-    videoSrc = null;
-  } finally {
-    await browser.close();
+  if (!url) {
+    return res.status(400).send('URL query parameter is required');
   }
 
-  return videoSrc;
-}
-
-bot.start((ctx) => ctx.reply('Welcome! Send me a website URL, and I will find the video source for you.'));
-
-bot.on('text', async (ctx) => {
-  const messageText = ctx.message.text;
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  const urlMatch = messageText.match(urlRegex);
-
-  if (urlMatch) {
-    const url = urlMatch[0];
-    try {
-      const videoUrl = await getVideoSrc(url);
-      ctx.reply(videoUrl || 'No video source found');
-    } catch (error) {
-      ctx.reply('Error retrieving video source.');
-    }
-  } else {
-    ctx.reply('Please send a valid website URL.');
+  try {
+    const response = await axios.get(url);
+    res.send(response.data);
+  } catch (error) {
+    res.status(500).send('Error fetching the URL');
   }
 });
 
-bot.launch();
-
-module.exports = (req, res) => {
-  res.send('Bot is running');
-};
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
